@@ -1,0 +1,42 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.40">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.86">
+    <script>node {
+    stage (&quot;init&quot;) {
+        println &quot;hello world&quot;
+    	def  output = sh ( script: &quot;&quot;&quot;#!/bin/bash
+    	        echo \\$pwd
+    	        cat &lt;&lt;EOF &gt; docker-compose.yaml
+version: &apos;2&apos;
+services:
+  fyber_demo:
+    image: gilbrown/fyber_demo:latest
+    container_name: fyber_demo
+    environment:
+      consul_host: consul    
+    ports:
+      - &apos;8082:8082&apos;
+    networks:
+      - fyber_default
+networks:
+  fyber_default:
+    driver: bridge  
+    external: true      
+    
+EOF
+    	        
+    	        docker-compose up -d
+             &quot;&quot;&quot;,
+    		returnStatus: true)
+        println &quot;${output}&quot;
+    }
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

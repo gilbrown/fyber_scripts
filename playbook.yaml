@@ -1,0 +1,53 @@
+
+- name: Install dependencies
+  hosts:
+    - localhost
+  become: yes
+  tasks:
+    # - name: Disable service docker 
+    #   systemd:
+    #     name: docker
+    #     state: stopped
+    #     enabled: yes
+    #   ignore_errors: yes
+    # - name: adding docker repository
+    #   yum_repository:
+    #     name: yum-docker
+    #     description: yum-docker
+    #     file: docker_repo
+    #     baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+    #     gpgcheck: no
+    #     enabled: yes 
+    # - name: Yum Installs
+    #   yum:
+    #     name: ['yum-utils', 'device-mapper-persistent-data', 'lvm2', 'ca-certificates', 'python-pip']
+    #     state: latest      
+    # - name: remove old docker components      
+    #   yum:
+    #     name: ['docker', 'docker-client', 'docker-client-latest', 'docker-common', 'docker-latest', 'docker-latest-logrotate', 'docker-logrotate', 'docker-engine']
+    #     state: absent    
+    # - name: Clean Old Docker Components
+    #   file:
+    #     state: absent
+    #     path: "{{ item }}"
+    #   with_items: 
+    #     - /var/lib/docker/
+    # - name: Install Docker
+    #   package:
+    #     name: docker-ce
+    #     state: latest
+    #   become: yes   
+    # - name: enable service docker and start it
+    #   systemd:
+    #     name: docker
+    #     state: started
+    #     enabled: yes   
+    # - name: Install Docker-Compose
+    #   shell: "sudo curl -L \"https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)\" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose"    
+    - name: create jenkins data dir
+      shell: "mkdir -p /home/jenkins-data/ && mkdir -p /home/consul_data/ && chmod 777 /home/jenkins-data && chmod 777  /home/consul_data/"
+    - name: building jenkins docker
+      shell: "cd {{playbook_dir}}/jenkins && docker build -t fyber/jenkins:lts ."
+    - name: run docker compose     
+      shell: "cd {{playbook_dir}} && docker-compose up -d"
+                    

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  consul:
+    image: docker.io/bitnami/consul:1-debian-10
+    container_name: consul
+    volumes:
+      - /home/consul_data:/bitnami/consul
+    ports:
+      - '8300:8300'
+      - '8301:8301'
+      - '8301:8301/udp'
+      - '8500:8500'
+      - '8600:8600'
+      - '8600:8600/udp'
+    expose:
+      - 8600
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8500"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+  jenkins:
+    image: fyber/jenkins:lts
+    privileged: true
+    user: root
+    ports:
+      - 8081:8080
+      - 50000:50000
+    container_name: jenkins
+    environment:
+      PLUGINS_FORCE_UPGRADE: "true"
+    volumes:
+      - /home/jenkins-data/:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/local/bin/docker:/usr/local/bin/docker    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+  consul_agent:
+    image: consul:latest
+    container_name: consul_agent
+    command: "agent -node=client-1 -join=consul"
+    environment:
+      CONSUL_LOCAL_CONFIG: "{\"leave_on_terminate\": true}"
+    depends_on:
+      - consul
